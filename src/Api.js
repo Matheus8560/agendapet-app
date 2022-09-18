@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const BASE_API = 'http://192.168.0.106:8000';
 
 export default {
@@ -28,6 +30,21 @@ export default {
         };
 
         const req = await fetch(`${BASE_API}/session`, requestOptions);
+        const json = await req.json()
+        return json;
+    },
+
+    getServicos: async(params) => {
+        const token = await AsyncStorage.getItem('token');
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${token}`);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        const req = await fetch(`${BASE_API}/servico${params}`, requestOptions)
         const json = await req.json()
         return json;
     }

@@ -4,7 +4,6 @@ export default StyleSheet.create({
     container: {
         display: "flex",
         flex: 1,
-        justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#fafdea",        
     },
@@ -12,6 +11,18 @@ export default StyleSheet.create({
     content: {
         display: "flex",
         width: "95%",
-        justifyContent: "center"
-    }
+        marginTop: 20
+    },
+    
+    input: {
+        backgroundColor: "#FFF",
+        height: 50,
+        width: "95%",
+        paddingHorizontal: 20,
+        marginVertical: 10,
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: "#758918"
+    },
+
 })

@@ -3,6 +3,8 @@ import { useNavigation } from "@react-navigation/native";
 import { ActivityIndicator, SafeAreaView, Text, View } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import Api from "../../Api";
+
 import styles from "./styles";
 
 export default () => {
@@ -17,13 +19,18 @@ export default () => {
             if (token) {
                 let response = await Api.checkToken(token);
                 if (response.token) {
-                    await AsyncStorage.setItem(response);
+                    await AsyncStorage.setItem('token', response.token);
                     navigation.reset({
                         routes:[{name: 'AdminDrawer'}]
                     })
-                }
+                } else {
+                    //Envia para login se o token for invalido
+                    navigation.reset({
+                       routes: [{name: 'Login'}]
+                    });
+                };
             } else {
-                //Envia para login
+                //Envia para login se o token não for encontrado
                 navigation.reset({
                    routes: [{name: 'Login'}]
                 });

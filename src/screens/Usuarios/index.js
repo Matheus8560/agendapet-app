@@ -9,7 +9,9 @@ export default () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text>Usuarios</Text>
+            <View style={styles.content}>
+                <Text>Usuarios</Text>
+            </View>
         </SafeAreaView>
     )
 }

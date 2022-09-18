@@ -19,11 +19,16 @@ export default () => {
             
             let response = await Api.login(email, senha);
             if (response.token) {
-                await AsyncStorage.setItem(response)
-
-                navigation.reset({
-                    routes:[{name: 'AdminDrawer'}]
-                })
+                await AsyncStorage.setItem('usuariId', response._id)
+                await AsyncStorage.setItem('usuarioNome', response.nome)
+                await AsyncStorage.setItem('usuarioNivel', response.nivel)
+                await AsyncStorage.setItem('token', response.token)
+                
+                if (response.nivel == 1) {
+                    navigation.reset({
+                        routes:[{name: 'AdminDrawer'}]
+                    })
+                }
             } else {
                 alert(response.erro)
             }
@@ -46,6 +51,7 @@ export default () => {
                     placeholder="E-mail"
                     value={email}
                     onChangeText={t=>setEmail(t)}
+                    autoCapitalize='none'
                 />
 
                 <TextInput 

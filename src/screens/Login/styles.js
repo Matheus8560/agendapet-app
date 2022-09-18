@@ -22,7 +22,7 @@ export default StyleSheet.create({
     loginButton: {
         backgroundColor: "#758918",
         height: 50,
-        width: '100%',
+        width: "100%",
         borderRadius: 25,
         justifyContent: "center",
         alignItems: "center"
@@ -30,6 +30,8 @@ export default StyleSheet.create({
 
     loginText: {
         color: "#FFF",
+        fontWeight: "bold",
+        fontSize: 18
     },
 
     recoveryButton: {
