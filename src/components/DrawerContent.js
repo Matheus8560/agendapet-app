@@ -22,7 +22,7 @@ export function DrawerContent(props) {
         <View style={styles.DrawerContent}>
             <DrawerContentScrollView {...props}>
                 <View style={styles.Titulo}>
-                    <Text> Agenda Pet </Text>
+                    <Text style={styles.TituloText}> Agenda Pet </Text>
                 </View>
                 <DrawerItemList {...props}/>
             </DrawerContentScrollView>
@@ -45,6 +45,11 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         borderBottomColor: '#ccc',
         borderBottomWidth: 1,
+    },
+    TituloText: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "#758918"
     },
     LogoutSection: {
         borderTopColor: '#ccc',

@@ -1,9 +1,9 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity  } from "react-native";
 
-export default ({onPress, text}) => {
+export default ({onPress, text, props}) => {
     return (
-        <TouchableOpacity onPress={onPress} style={styles.cancelButton} >
+        <TouchableOpacity onPress={onPress} style={styles.cancelButton} {...props} >
             <Text style={styles.textButton}>{text}</Text>
         </TouchableOpacity>
     )
@@ -12,8 +12,8 @@ export default ({onPress, text}) => {
 const styles = StyleSheet.create({
     cancelButton: {
         backgroundColor: "#49281f",
-        height: 50,
-        width: "100%",
+        paddingVertical: 15,
+        paddingHorizontal: 25,
         borderRadius: 25,
         justifyContent: "center",
         alignItems: "center"
@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
     textButton: {
         color: "#FFF",
         fontWeight: "bold",
+        lineHeight: 20,
         fontSize: 18
     },
 })

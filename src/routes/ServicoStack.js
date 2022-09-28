@@ -9,12 +9,12 @@ const Stack = createNativeStackNavigator();
 
 export default () => (
     <Stack.Navigator 
-        initialRouteName="Home"
+        initialRouteName="HomeServicos"
         screenOptions={{
             headerShown: false
         }}
     >
-        <Stack.Screen name="Home" component={Servicos} />
+        <Stack.Screen name="HomeServicos" component={Servicos} />
         <Stack.Screen name="ServicosForm" component={ServicosForm} />
         <Stack.Screen name="Agendar" component={Agendar} />
     </Stack.Navigator>

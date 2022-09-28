@@ -102,9 +102,12 @@ export default () => {
                             <ServicoItem 
                                 key={k}
                                 nome={item.titulo}
-                                valor={formatarMoeda(item.valor)}
+                                descricao={item.descricao}
+                                nivel={isAdmin}
+                                valor={formatarMoeda(item.valor/100)}
                                 duracao={item.duracao}
                                 onPress={() => handleServico(item)}
+                                onDelete={() => handleServico(item)}
                             />
                         ))
                     }

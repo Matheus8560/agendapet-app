@@ -12,7 +12,8 @@ export default StyleSheet.create({
         display: "flex",
         width: "100%",
         height: "100%",
-        marginTop: 20
+        marginTop: 20,
+        marginBottom: 80
     },
 
     form: {
@@ -20,22 +21,18 @@ export default StyleSheet.create({
         alignItems: "center",
         width: "100%",
     },
+
+    titulo:{
+        fontSize:18,
+        color: '#758918',
+        fontWeight: "600",
+    },
     
     input: {
         backgroundColor: "#FFF",
         height: 50,
         width: "90%",
         paddingHorizontal: 20,
-        marginVertical: 10,
-        borderRadius: 25,
-        borderWidth: 1,
-        borderColor: "#758918"
-    },
-
-    piker: {
-        backgroundColor: "#FFF",
-        width: "90%",
-        paddingHorizontal: 5,
         marginVertical: 10,
         borderRadius: 25,
         borderWidth: 1,

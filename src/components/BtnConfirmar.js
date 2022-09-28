@@ -12,8 +12,8 @@ export default ({onPress, text}) => {
 const styles = StyleSheet.create({
     confirmButton: {
         backgroundColor: "#758918",
-        height: 50,
-        width: "100%",
+        paddingVertical: 15,
+        paddingHorizontal: 25,
         borderRadius: 25,
         justifyContent: "center",
         alignItems: "center"
@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
     textButton: {
         color: "#FFF",
         fontWeight: "bold",
+        lineHeight: 20,
         fontSize: 18
     },
 })

@@ -47,5 +47,50 @@ export default {
         const req = await fetch(`${BASE_API}/servico${params}`, requestOptions)
         const json = await req.json()
         return json;
-    }
+    },
+
+    getUsuario: async(params) => {
+        const token = await AsyncStorage.getItem('token');
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${token}`);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        const req = await fetch(`${BASE_API}/usuario${params}`, requestOptions)
+        const json = await req.json()
+        return json;
+    },
+
+    getHorario: async(params) => {
+        const token = await AsyncStorage.getItem('token');
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${token}`);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        const req = await fetch(`${BASE_API}/horario${params}`, requestOptions)
+        const json = await req.json()
+        return json;
+    },
+
+    getAgendamentos: async(params) => {
+        const token = await AsyncStorage.getItem('token');
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${token}`);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        const req = await fetch(`${BASE_API}/agendamento${params}`, requestOptions)
+        const json = await req.json()
+        return json;
+    },
 }
