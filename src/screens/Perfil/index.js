@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import MaskInput, { Masks } from 'react-native-mask-input';
 
@@ -8,6 +8,8 @@ import styles from "./styles";
 import Header from "../../components/Header";
 import BtnCancelar from "../../components/BtnCancelar";
 import BtnConfirmar from "../../components/BtnConfirmar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Api from "../../Api";
 
 export default () => {
     const navigation = useNavigation();
@@ -15,19 +17,105 @@ export default () => {
     const [nome, setNome] = useState('')
     const [email, setEmail] = useState('')
     const [telefone, setTelefone] = useState('')
+    const [telefoneTela, setTelefoneTela] = useState('')
     const [senha, setSenha] = useState('')
     const [senhaConfirma, setSenhaConfirma] = useState('')
 
     const handleCancelar = () =>{
-        navigation.navigate('HomeUsuarios');
-    }
-    const handleSalvar = () =>{
-        navigation.navigate('HomeUsuarios');
+        getDados();
+        setSenha('')
+        setSenhaConfirma('')
     }
 
-    // useEffect(()=>{
-    
-    // },[])
+    const handleSalvar = async () =>{
+        if (nome != '' && email != '' && telefone != '') {
+
+            if (senha != '') {
+
+                if (senha === senhaConfirma) {
+                    
+                    if (senha.length >= 6) {
+                        const body ={
+                            nome: nome,
+                            email: email,
+                            telefone: telefone,
+                            senha: senha
+                        }
+                        const res = await Api.updateUsuario(body, usuarioId);
+        
+                        if (res.email) {
+                            getDados();
+                            setSenha('')
+                            setSenhaConfirma('')
+                            Alert.alert(
+                                'Sucesso',
+                                `Usuário atualizado com sucesso.`
+                            );
+                        } else {
+                            Alert.alert(
+                                'Atenção',
+                                `Falha da validação. Verifique os dados!`
+                            );
+                        }
+                    } else {
+                        Alert.alert(
+                            'Atenção',
+                            `Senha deve conter no minimo 6 caracteres.`
+                        );
+                    }
+                } else {
+                    Alert.alert(
+                        'Atenção',
+                        `Confirmação de senha não confere.`
+                    );
+                }
+            } else {
+                const body ={
+                    nome: nome,
+                    email: email,
+                    telefone: telefone,
+                }
+                const res = await Api.updateUsuario(body, usuarioId);
+
+                if (res.email) {
+                    getDados();
+                    Alert.alert(
+                        'Sucesso',
+                        `Usuário atualizado com sucesso.`,
+                    );
+                } else {
+                    Alert.alert(
+                        'Atenção',
+                        `Falha da validação. Verifique os dados!`
+                    );
+                }
+            }
+        } else {
+            Alert.alert(
+                'Atenção',
+                `Preencha os dados obrigatórios.`,
+            );
+        }
+    }
+
+    const getDados = async () => {
+        const id = await AsyncStorage.getItem('usuariId');
+
+        let res = await Api.getUsuario(`?_id=${id}`);
+        if(!res.error) {
+            setUsuarioId(res[0]._id)
+            setNome(res[0].nome)
+            setEmail(res[0].email)
+            setTelefone(res[0].telefone)
+            setTelefoneTela(res[0].telefone)
+        } else {
+            alert("Erro: "+res.error);
+        }
+    }
+
+    useEffect(()=>{
+        getDados();
+    },[])
 
     return (
         <SafeAreaView style={styles.container}>
@@ -46,13 +134,17 @@ export default () => {
                         placeholder="Email"
                         value={email}
                         onChangeText={v=>setEmail(v)}
+                        autoCapitalize='none'
                     />
                     <MaskInput 
                         style={styles.input}
                         keyboardType="numeric"
                         placeholder="Telefone"
-                        value={telefone}
-                        onChangeText={v=>setTelefone(v)}
+                        value={telefoneTela}
+                        onChangeText={(masked, unmasked)=>{
+                            setTelefoneTela(masked)
+                            setTelefone(unmasked)
+                        }}
                         mask={Masks.BRL_PHONE}
                     />                    
                 </View>
@@ -63,12 +155,14 @@ export default () => {
                         placeholder="Nova Senha"
                         value={senha}
                         onChangeText={v=>setSenha(v)}
+                        secureTextEntry={true}
                     />
                     <TextInput
                         style={styles.input}
                         placeholder="Confirmar Senha"
                         value={senhaConfirma}
                         onChangeText={v=>setSenhaConfirma(v)}
+                        secureTextEntry={true}
                     />                  
                 </View>
             </ScrollView>

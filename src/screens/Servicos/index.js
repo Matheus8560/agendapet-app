@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { ActivityIndicator, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import Api from "../../Api";
 
@@ -11,10 +11,13 @@ import { formatarMoeda } from "../../utils";
 import styles from "./styles";
 import Header from "../../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomModal from "../../components/CustomModal";
 
 export default () => {
     const navigation = useNavigation();
 
+    const [modalOpen, setModalOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState();
     const [search, setSearch] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -45,9 +48,13 @@ export default () => {
     }
 
     useEffect(()=>{
-        getServicos();
-        getNivel();
-    }, []);
+        const unsubscribe = navigation.addListener('focus', () => {
+            getServicos();
+            getNivel();
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     const onRefresh = () => {
         setRefreshing(false);
@@ -76,7 +83,24 @@ export default () => {
     }
 
     const handleServico = (servico) => {
-        navigation.navigate('ServicosForm', { servico });
+        if (nivel == 1) {
+            navigation.navigate('ServicosForm', { servico });
+        } else {
+            navigation.navigate('Agendar', { servico });
+        }
+    }
+    
+    const handleDelete = async (id) => {
+        const res = await Api.deleteServicos(id);
+        if (res.msg) {
+            setModalOpen(false);
+            setDeleteId();
+            getServicos();
+            Alert.alert(
+                'Sucesso',
+                res.msg,
+            );
+        };
     }
 
     return (
@@ -107,14 +131,25 @@ export default () => {
                                 valor={formatarMoeda(item.valor/100)}
                                 duracao={item.duracao}
                                 onPress={() => handleServico(item)}
-                                onDelete={() => handleServico(item)}
+                                onDelete={() => {
+                                    setModalOpen(true) 
+                                    setDeleteId(item._id)
+                                }}
                             />
                         ))
                     }
 
                 </View>
             </ScrollView>    
-            {isAdmin && <BtnAdicionar onPress={handleAdicionar} /> }                  
+            {isAdmin && <BtnAdicionar onPress={handleAdicionar} /> }     
+            {modalOpen ? 
+                <CustomModal
+                    header="Exclusão de Serviço"
+                    onClose={() => setModalOpen(!modalOpen)}
+                    msg="Deseja realmente excluir este serviço e todos os agendamentos ligados a ele?"
+                    confirm={() => handleDelete(deleteId)}
+                />
+            : null }             
         </SafeAreaView>
     )
 }

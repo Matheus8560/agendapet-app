@@ -7,9 +7,11 @@ export default (dados) => {
         dados.nivel ? 
             <View style={styles.containerAdmin}>
                 <TouchableOpacity style={styles.contentAdmin} onPress={dados.onPress} >
-                    <View>
+                    <View style={{height:65, width:"65%"}}>
                         <Text style={styles.titulo}>{ dados.nome }</Text>
-                        <Text style={styles.descricao}>{ dados.descricao }</Text>
+                        <Text style={styles.descricao}>
+                            { dados.descricao.length > 35 ? dados.descricao.substr(0, 35)+"..."  : dados.descricao }
+                        </Text>
                     </View>
                     <View>
                         <Text>Valor: R$ { dados.valor } </Text>
@@ -22,8 +24,13 @@ export default (dados) => {
             </View>
             :
             <TouchableOpacity style={styles.content} onPress={dados.onPress} >
-                <Text>{ dados.nome }</Text>
-                <View>
+                <View style={{height:65, width:"70%"}}>
+                    <Text style={styles.titulo}>{ dados.nome }</Text>
+                    <Text style={styles.descricao}>
+                        { dados.descricao.length > 35 ? dados.descricao.substr(0, 35)+"..."  : dados.descricao }
+                    </Text>
+                </View>
+                <View style={{height: "100%", width:"30%", alignItems: "center"}}>
                     <Text>Valor: { dados.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) } R$</Text>
                     <Text>Duração: { dados.duracao == '1' ? "30 min" : "1 Hora" }</Text>
                 </View>
@@ -70,5 +77,10 @@ const styles = StyleSheet.create({
         width: "14%",
         borderLeftColor: "#758918",
         borderLeftWidth: 1,
+    },
+    titulo: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#758918",
     }
 })

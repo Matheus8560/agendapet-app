@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View  } from "react-native";
+import { AntDesign } from '@expo/vector-icons'; 
 import BtnCancelar from "./BtnCancelar";
 import BtnConfirmar from "./BtnConfirmar";
 
@@ -11,7 +12,7 @@ export default BtnAdicionar = (props) => {
                     <View style={styles.header}>
                         <Text style={styles.headerText}>{props.header}</Text>
                         <TouchableOpacity onPress={props.onClose} style={styles.btnFechar} >
-                            <Text>X</Text>
+                            <AntDesign name="close" size={24} color="#FFF" />
                         </TouchableOpacity> 
                     </View>
                     <View style={styles.body}>
@@ -57,7 +58,9 @@ const styles = StyleSheet.create({
     body: {
         display: 'flex',
         flexDirection: 'row',
-        padding: 15,
+        paddingTop: 15,
+        paddingHorizontal: 15,
+        paddingBottom: 25,
         backgroundColor: '#FFF',
     },
     footer: {

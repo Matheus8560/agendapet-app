@@ -15,14 +15,22 @@ export default () => {
         // função para verificar se existe token salvo no storage
         const checkToken = async () => {
             const token = await AsyncStorage.getItem('token');
+            const nivel = await AsyncStorage.getItem('usuarioNivel');
 
             if (token) {
                 let response = await Api.checkToken(token);
                 if (response.token) {
                     await AsyncStorage.setItem('token', response.token);
-                    navigation.reset({
-                        routes:[{name: 'AdminDrawer'}]
-                    })
+                    
+                    if (nivel == 1) {
+                        navigation.reset({
+                            routes:[{name: 'AdminDrawer'}]
+                        })
+                    } else {
+                        navigation.reset({
+                            routes:[{name: 'UsuarioDrawer'}]
+                        })
+                    }
                 } else {
                     //Envia para login se o token for invalido
                     navigation.reset({

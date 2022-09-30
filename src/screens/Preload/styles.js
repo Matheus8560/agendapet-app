@@ -10,7 +10,8 @@ export default StyleSheet.create({
     },
 
     title: {
-        color: "#758918",      
+        color: "#758918",
+        fontSize: 25      
     },
 
     loadin: {

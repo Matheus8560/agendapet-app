@@ -1,119 +1,191 @@
-import React, { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, RefreshControl, SafeAreaView, ScrollView, Text, View } from "react-native";
+import moment from 'moment';
+import 'moment/locale/pt-br';
+
+
+import Api from "../../../Api";
+import { coverteHora, formatarMoeda } from "../../../utils";
+
 import styles from "./styles";
+import Header from "../../../components/Header";
+import CustomModal from "../../../components/CustomModal";
+import BtnConfirmar from "../../../components/BtnConfirmar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default () => {
+export default ({route, navigation}) => {
+    moment.locale('pt-br')
 
-    const navigation = useNavigation();
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [vagas, setVagas] = useState([]);
+
+    const [servicoId, setServicoId] = useState('')
+    const [titulo, setTitulo] = useState('')
+    const [descricao, setDescricao] = useState('')
+    const [valor, setValor] = useState('')
+    const [duracao, setDuracao] = useState()
+    const [horario, setHorario] = useState()
+    const [dia, setdia] = useState()
+
+    const getDisponibilidade = async (params = '') => {
+        setLoading(true);
+        setVagas([]);
+
+        let res = await Api.getDisponibilidade(params);
+        if(!res.error) {
+            setVagas(res);
+        } else {
+            alert("Erro: "+res.error);
+        }
+
+        setLoading(false);
+    }
+
+    const handleAgenda = async () => {
+        const usuarioId = await AsyncStorage.getItem("usuariId");
+
+        if (duracao == 1) {
+            const body = {
+                servicoId: servicoId,
+                clienteId: usuarioId,
+                data: dia,
+                hora: [horario],
+                valor: valor
+            }
+            const res = await Api.createAgendamento(body);
+
+            if (res._id) {
+                Alert.alert(
+                    'Sucesso',
+                    `Seu serviço foi agendado com sucesso.`,
+                    [{
+                        text: 'OK',
+                        onPress: () => {
+                            navigation.reset({
+                                routes:[{name: 'Agendamentos'}]
+                            })
+                        },
+                    }],
+                );
+            } else {
+                setModalOpen(!modalOpen)
+                Alert.alert(
+                    'Erro',
+                    'Não foi possivel completar agendamento. Tente outro horário.',
+                );
+            }
+        } else {
+            const body = {
+                servicoId: servicoId,
+                clienteId: usuarioId,
+                data: dia,
+                hora: [horario, horario+1],
+                valor: valor
+            }
+
+            const res = await Api.createAgendamento(body);
+
+            if (res._id) {
+                Alert.alert(
+                    'Sucesso',
+                    `Seu serviço foi agendado com sucesso.`,
+                    [{
+                        text: 'OK',
+                        onPress: () => {
+                            navigation.reset({
+                                routes:[{name: 'Agendamentos'}]
+                            })
+                        },
+                    }],
+                );
+            } else {
+                setModalOpen(!modalOpen)
+                Alert.alert(
+                    'Erro',
+                    'Não foi possivel completar agendamento. Tente outro horário.',
+                );
+            }
+        }
+    }
+
+    useEffect(()=>{
+        setServicoId(route.params.servico._id);
+        setTitulo(route.params.servico.titulo);
+        setDescricao(route.params.servico.descricao);
+        setValor(route.params.servico.valor);
+        setDuracao(route.params.servico.duracao);
+        getDisponibilidade(`/?espacos=${route.params.servico.duracao}`);
+    }, []);
+
+    const onRefresh = () => {
+        setRefreshing(false);
+        getDisponibilidade(`/?espacos=${duracao}`);
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <Text>Agendamento</Text>
-            </View>
+            <Header titulo='Agendar Serviço' />
+            <ScrollView style={{width:'95%'}} refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+                <View style={styles.listagem}>
+                    {loading &&
+                        <ActivityIndicator size="large" color="#758918" />
+                    }
+                    
+                    {!loading &&
+                        vagas.map((item, k)=>(
+                            <View key={k} style={styles.cardContainer}>
+                                <Text style={styles.data}>
+                                    { moment(item.dia).utcOffset("-03:00").format("DD/MM/YYYY") }</Text>
+                                    { moment(item.dia).format(" - dddd") }
+                                <View style={styles.servicoInfo}>    
+                                    <View>
+                                        <Text>{titulo}</Text>
+                                        <Text>{descricao}</Text>
+                                    </View>
+                                    <View>
+                                        <Text>Valor: R$ {formatarMoeda(valor/100)}</Text>
+                                        <Text>Duração: {duracao == '1' ? "30 min" : "1 Hora"}</Text>
+                                    </View>
+                                </View>
+
+                                <View style={{padding:15}}>
+                                    <Text style={styles.escolhaText}>Escolha um horário</Text>
+                                    {item.horarios.map((hora, k)=>(
+                                        <View key={k} style={styles.horaItem}>
+                                            <Text style={styles.horaItemText}>
+                                                { coverteHora(hora) }
+                                            </Text>
+                                            <View style={{width: '40%'}}>
+                                                <BtnConfirmar
+                                                    onPress={() => {
+                                                        setModalOpen(true) 
+                                                        setHorario(hora)
+                                                        setdia(moment(item.dia).format("YYYY-MM-DD")+'T12:00:00Z')
+                                                    }}
+                                                    text="Agendar"
+                                                />
+                                            </View>
+                                        </View>
+                                    ))}
+                                </View>
+
+                            </View>
+                        ))
+                    }
+                </View>
+            </ScrollView>
+            {modalOpen ? 
+                <CustomModal
+                    header="Confirmar Agendamento"
+                    msg="Realmente deseja confirmar o agendamento deste serviço?" 
+                    onClose={() => setModalOpen(!modalOpen)}
+                    confirm={() => handleAgenda()}
+                />
+            : null }          
         </SafeAreaView>
     )
 }
-
-// import React, { useEffect, useState } from "react";
-// import { useNavigation } from "@react-navigation/native";
-// import { ActivityIndicator, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-
-// import Api from "../../Api";
-
-// import ServicoItem from "../../components/ServicoItem";
-// import BtnAdicionar from "../../components/BtnAdicionar";
-// import { formatarMoeda } from "../../utils";
-
-// import styles from "./styles";
-
-// export default () => {
-//     const navigation = useNavigation();
-
-//     const [search, setSearch] = useState('');
-//     const [loading, setLoading] = useState(true);
-//     const [listaOriginal, setListaOriginal] = useState([]);
-//     const [listaFiltro, setListaFiltro] = useState([]);
-//     const [refreshing, setRefreshing] = useState(false);
-
-//     const getServicos = async (params = '') => {
-//         setLoading(true);
-//         setListaOriginal([]);
-
-//         let res = await Api.getServicos(params);
-//         if(!res.error) {
-//             setListaOriginal(res);
-//             setListaFiltro(res);
-//         } else {
-//             alert("Erro: "+res.error);
-//         }
-
-//         setLoading(false);
-//     }
-
-//     useEffect(()=>{
-//         getServicos();
-//     }, []);
-
-//     const onRefresh = () => {
-//         setRefreshing(false);
-//         getServicos();
-//     }
-
-//     const handleSearch = () => {
-//         if (search == '') {
-//             setListaFiltro(listaOriginal);
-//         } else {
-//             const listaFiltrada = listaOriginal.filter(
-//                 function (item) {
-//                     const itemData = item.titulo
-//                     ? item.titulo.toUpperCase()
-//                     : ''.toUpperCase();
-//                 const textData = search.toUpperCase();
-//                 return itemData.indexOf(textData) > -1;
-//                 }
-//             );
-//             setListaFiltro(listaFiltrada);
-//         }
-//     }
-
-//     const handleAdicionar = () => {
-//         alert('agora deu ruim kkk')
-//     }
-
-//     return (
-//         <SafeAreaView style={styles.container}>
-//             <TextInput 
-//                 style={styles.inputSearch} 
-//                 placeholder="Buscar serviço pelo nome"
-//                 value={search}
-//                 onChangeText={t=>setSearch(t)}
-//                 onEndEditing={handleSearch}
-//             />
-//             <ScrollView style={{width:'95%'}}>
-//                 <View style={styles.listagem} refreshControl={
-//                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-//                 }>
-//                     {loading &&
-//                         <ActivityIndicator size="large" color="#758918" />
-//                     }
-                    
-//                     {!loading &&
-//                         listaFiltro.map((item, k)=>(
-//                             <ServicoItem 
-//                                 key={k} 
-//                                 id={item._id}
-//                                 nome={item.titulo}
-//                                 valor={formatarMoeda(item.valor)}
-//                                 duracao={item.duracao}
-//                             />
-//                         ))
-//                     }
-
-//                 </View>
-//             </ScrollView>          
-//             <BtnAdicionar onPress={handleAdicionar} /> 
-//         </SafeAreaView>
-//     )
-// }

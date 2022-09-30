@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { ActivityIndicator, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import Api from "../../Api";
 
@@ -17,7 +17,6 @@ export default () => {
 
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [listaHorarios, setListaHorarios] = useState([]);
 
     const [domInicio, setDomInicio] = useState();
     const [domFim, setDomFim] = useState();
@@ -94,55 +93,61 @@ export default () => {
             setSabAtivo(res[6].ativo)
             setSabId(res[6]._id)
         } else {
-            alert("Erro: "+res.error);
+            Alert.alert(
+                'Erro',
+                res.error,
+            );
         }
 
         setLoading(false);
     }
 
-    const handleAtiva = (id, status) => {
-        alert(id + " " + !status)
+    const handleSalva = async (ativo, fim, inicio, id) => {
+        if (inicio < fim) {
+            if (id) {
+                const body = {
+                    inicio: inicio,
+                    fim: fim,
+                    ativo: ativo
+                }
+                const res = await Api.updateHorario(body, id);
+
+                if (res._id) {
+                    getHorario();
+                    Alert.alert(
+                        'Sucesso',
+                        `A disponibilidade de serviços para este dia foi atualizada com sucesso.`,
+                    );
+                }
+            } else { 
+                Alert.alert(
+                    'Erro',
+                    "Horário não encontrado.",
+                );
+            }
+        } else {
+            Alert.alert(
+                'Erro',
+                "Horário de início não pode ser maior que horário de fim.",
+            );
+        }
+    }
+
+    const onRefresh = () => {
+        setRefreshing(false);
+        getHorario();
     }
 
     useEffect(()=>{
         getHorario();
     }, []);
 
-    // const onRefresh = () => {
-    //     setRefreshing(false);
-    //     getUsuario();
-    // }
-
-    // const handleSearch = () => {
-    //     if (search == '') {
-    //         setListaFiltro(listaOriginal);
-    //     } else {
-    //         const listaFiltrada = listaOriginal.filter(
-    //             function (item) {
-    //                 const itemData = item.nome
-    //                 ? item.nome.toUpperCase()
-    //                 : ''.toUpperCase();
-    //             const textData = search.toUpperCase();
-    //             return itemData.indexOf(textData) > -1;
-    //             }
-    //         );
-    //         setListaFiltro(listaFiltrada);
-    //     }
-    // }
-
-    // const handleAdicionar = () => {
-    //     navigation.navigate('UsuarioForm');
-    // }
-
-    // const handleUsuario = (usuario) => {
-    //     navigation.navigate('UsuarioForm', { usuario });
-    // }
-    
-
     return (
         <SafeAreaView style={styles.container}>
             <Header titulo='Horários' btn='menu'/>
-            <ScrollView style={{width:'95%'}}>
+            <ScrollView style={{width:'95%'}} refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
                 <View style={styles.listagem}>
                     {loading &&
                         <ActivityIndicator size="large" color="#758918" />
@@ -169,9 +174,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={domAtivo}
-                                    onPress={() => {handleAtiva(domId, domAtivo)}}
+                                    onPress={() => setDomAtivo(!domAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(domAtivo, domFim, domInicio, domId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>
@@ -196,9 +204,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={segAtivo}
-                                    onPress={() => {handleAtiva(segId, segAtivo)}}
+                                    onPress={() => setSegAtivo(!segAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(segAtivo, segFim, segInicio, segId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>
@@ -223,9 +234,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={terAtivo}
-                                    onPress={() => {handleAtiva(terId, terAtivo)}}
+                                    onPress={() => setTerAtivo(!terAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(terAtivo, terFim, terInicio, terId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>
@@ -250,9 +264,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={quaAtivo}
-                                    onPress={() => {handleAtiva(quaId, quaAtivo)}}
+                                    onPress={() => setQuaAtivo(!quaAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(quaAtivo, quaFim, quaInicio, quaId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>
@@ -277,9 +294,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={quiAtivo}
-                                    onPress={() => {handleAtiva(quiId, quiAtivo)}}
+                                    onPress={() => setQuiAtivo(!quiAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(quiAtivo, quiFim, quiInicio, quiId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>
@@ -304,9 +324,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={sexAtivo}
-                                    onPress={() => {handleAtiva(sexId, sexAtivo)}}
+                                    onPress={() => setSexAtivo(!sexAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(sexAtivo, sexFim, sexInicio, sexId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>
@@ -331,9 +354,12 @@ export default () => {
                             <View style={styles.cardButtons}>
                                 <BtnAtivo 
                                     ativo={sabAtivo}
-                                    onPress={() => {handleAtiva(sabId, sabAtivo)}}
+                                    onPress={() => setSabAtivo(!sabAtivo)}
                                 />
-                                <TouchableOpacity style={styles.salvarBtn}>
+                                <TouchableOpacity 
+                                    style={styles.salvarBtn} 
+                                    onPress={() => handleSalva(sabAtivo, sabFim, sabInicio, sabId)}
+                                >
                                     <Text style={styles.textSalvarBtn}>Salvar</Text>
                                 </TouchableOpacity>
                             </View>

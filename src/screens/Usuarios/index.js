@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { ActivityIndicator, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import Api from "../../Api";
 
@@ -9,11 +9,14 @@ import Header from "../../components/Header";
 import UsuarioItem from "../../components/UsuarioItem";
 
 import styles from "./styles";
+import CustomModal from "../../components/CustomModal";
 
 export default () => {
     const navigation = useNavigation();
 
     const [search, setSearch] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState();
     const [loading, setLoading] = useState(true);
     const [listaOriginal, setListaOriginal] = useState([]);
     const [listaFiltro, setListaFiltro] = useState([]);
@@ -28,15 +31,22 @@ export default () => {
             setListaOriginal(res);
             setListaFiltro(res);
         } else {
-            alert("Erro: "+res.error);
+            Alert.alert(
+                'Erro',
+                res.error,
+            );
         }
 
         setLoading(false);
     }
 
     useEffect(()=>{
-        getUsuario();
-    }, []);
+        const unsubscribe = navigation.addListener('focus', () => {
+            getUsuario();
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     const onRefresh = () => {
         setRefreshing(false);
@@ -68,6 +78,24 @@ export default () => {
         navigation.navigate('UsuarioForm', { usuario });
     }
 
+    const handleDelete = async (id) => {
+        const res = await Api.deleteUsuario(id);
+        if (res.msg) {
+            setModalOpen(false);
+            setDeleteId();
+            getUsuario();
+            Alert.alert(
+                'Sucesso',
+                res.msg,
+            );
+        } else {
+            Alert.alert(
+                'Sucesso',
+                res.erro,
+            );
+        };
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <Header titulo='Usuários' btn='menu'/>
@@ -88,18 +116,30 @@ export default () => {
                     
                     {!loading &&
                         listaFiltro.map((item, k)=>(
-                            <UsuarioItem 
-                                key={k}
-                                nome={item.nome}
-                                onPress={() => handleUsuario(item)}
-                                onDelete={() => handleUsuario(item)}
-                            />
+                            item.nivel!=1 &&
+                                <UsuarioItem 
+                                    key={k}
+                                    nome={item.nome}
+                                    onPress={() => handleUsuario(item)}
+                                    onDelete={() =>  {
+                                        setModalOpen(true) 
+                                        setDeleteId(item._id)
+                                    }}
+                                />
                         ))
                     }
 
                 </View>
             </ScrollView>    
-            <BtnAdicionar onPress={handleAdicionar} />                 
+            <BtnAdicionar onPress={handleAdicionar} />  
+            {modalOpen ? 
+                <CustomModal
+                    header="Exclusão de Usuário"
+                    onClose={() => setModalOpen(!modalOpen)}
+                    msg="Deseja realmente excluir este usuário e todos os agendamentos ligados a ele?"
+                    confirm={() => handleDelete(deleteId)}
+                />
+            : null }                 
         </SafeAreaView>
     )
 }

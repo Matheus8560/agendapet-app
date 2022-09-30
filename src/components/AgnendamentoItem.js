@@ -2,10 +2,11 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import moment from "moment";
+import 'moment/locale/pt-br'
 
 export default (dados) => {
+    moment.locale('pt-br')
     return (
-        
         <View style={styles.container}>
             <View style={styles.Header}>
                 <Text style={styles.HeaderText}>{ dados.nomeServico }</Text>
@@ -14,7 +15,10 @@ export default (dados) => {
                 </TouchableOpacity>
             </View>
             <View>
-                <Text style={styles.bodyItem}>Data: { moment(dados.data).add(1, 'day').format("DD/MM/YYYY") } </Text>
+                <Text style={styles.bodyItem}>
+                    Data: { moment(dados.data).utcOffset("-03:00").startOf('day').format("DD/MM/YYYY") } 
+                    { moment(dados.data).format(" - dddd") }
+                </Text>
                 <Text style={styles.bodyItem}>Usuario: { dados.usuario } </Text>
                 <Text style={styles.bodyItem}>Valor: R$ { dados.valor } </Text>
                 <Text style={styles.bodyItem}>Horário: { dados.hora } </Text>

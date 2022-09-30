@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import Api from "../../Api";
 
@@ -28,13 +28,23 @@ export default () => {
                     navigation.reset({
                         routes:[{name: 'AdminDrawer'}]
                     })
+                } else {
+                    navigation.reset({
+                        routes:[{name: 'UsuarioDrawer'}]
+                    })
                 }
             } else {
-                alert(response.erro)
+                Alert.alert(
+                    'Erro',
+                    'Login e/ou senha inválidos!',
+                );
             }
 
         } else {
-            alert('Prença os campos!');
+            Alert.alert(
+                'Atenção',
+                'Preencha os campos de e-mail e senha.',
+            );
         }    
     }
 
@@ -45,7 +55,7 @@ export default () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-
+                <Text style={styles.titulo}>Agenda Pet</Text>
                 <TextInput 
                     style={styles.input} 
                     placeholder="E-mail"

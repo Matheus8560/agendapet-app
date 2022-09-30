@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { ActivityIndicator, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import Api from "../../Api";
 
@@ -10,24 +10,38 @@ import CustomModal from "../../components/CustomModal";
 
 import styles from "./styles";
 import { coverteHora, formatarMoeda } from "../../utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default () => {
     const navigation = useNavigation();
 
     const [modalOpen, setModalOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [lista, setLista] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [deleteId, setDeleteId] = useState(false);
 
     const getAgendamentos = async (params = '') => {
         setLoading(true);
         setLista([]);
+        id = await AsyncStorage.getItem('usuariId');
+        nivel = await AsyncStorage.getItem('usuarioNivel');
 
-        let res = await Api.getAgendamentos(params);
-        if(!res.error) {
-            setLista(res);
+        if (nivel == 1) {
+            let res = await Api.getAgendamentos(params);
+            if(!res.error) {
+                setLista(res);
+            } else {
+                alert("Erro: "+res.error);
+            }
         } else {
-            alert("Erro: "+res.error);
+            let res = await Api.getAgendamentos(`/?clienteId=${id}`);
+            if(!res.error) {
+                setLista(res);
+            } else {
+                alert("Erro: "+res.error);
+            }
         }
 
         setLoading(false);
@@ -42,23 +56,25 @@ export default () => {
         getAgendamentos();
     }
 
-    // const handleSearch = () => {
-    //     if (search == '') {
-    //     } else {
-    //         const listaFiltrada = lista.filter(
-    //             function (item) {
-    //                 const itemData = item.nome
-    //                 ? item.nome.toUpperCase()
-    //                 : ''.toUpperCase();
-    //             const textData = search.toUpperCase();
-    //             return itemData.indexOf(textData) > -1;
-    //             }
-    //         );
-    //     }
-    // }
-
-    const handleDelete = (agendamento) => {
-        setModalOpen(true)
+    const handleDelete = async (id) => {
+        const res = await Api.deleteAgendamento(id);
+        if (res.msg) {
+            setModalOpen(false);
+            setDeleteId();
+            getAgendamentos();
+            Alert.alert(
+                'Sucesso',
+                res.msg,
+            );
+        } else {
+            setModalOpen(false);
+            setDeleteId();
+            getAgendamentos();
+            Alert.alert(
+                'erro',
+                res.erro,
+            );
+        }
     }
 
     return (
@@ -82,7 +98,10 @@ export default () => {
                                 usuario={item.clienteId.nome}
                                 valor={formatarMoeda(item.valor/100)}
                                 duracao={item.servicoId.duracao}
-                                onDelete={() => handleDelete(item)}
+                                onDelete={() => {
+                                    setModalOpen(true) 
+                                    setDeleteId(item._id)
+                                }}
                             />
                         ))
                     }
@@ -95,7 +114,7 @@ export default () => {
                     header="Exclusão de Agendamento"
                     onClose={() => setModalOpen(!modalOpen)}
                     msg="Deseja realmente excluir este agendamento?"
-                    confirm={() => console.log("exclui")}
+                    confirm={() => handleDelete(deleteId)}
                 />
             : null }                   
         </SafeAreaView>

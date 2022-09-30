@@ -38,6 +38,13 @@ export default StyleSheet.create({
         marginTop: 30,
         marginTop: 20,
     },
+
+    titulo: {
+        color: "#758918",
+        fontWeight: "bold",
+        fontSize: 32,
+        marginBottom: 25
+    },
     
     input: {
         backgroundColor: "#FFF",

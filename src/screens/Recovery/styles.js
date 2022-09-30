@@ -48,6 +48,13 @@ export default StyleSheet.create({
         borderColor: "#4f4d4d"
     },
 
+    titulo: {
+        color: "#758918",
+        fontWeight: "bold",
+        fontSize: 32,
+        marginBottom: 25
+    },
+
     recoverInfo: {
         width: "100%",
         textAlign: "left",

@@ -6,6 +6,7 @@ import Login from "../screens/Login";
 import Recovery from "../screens/Recovery";
 
 import AdminDrawer from "./AdminDrawer";
+import UsuarioDrawer from "./UsuarioDrawer";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,5 +21,6 @@ export default () => (
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Recovery" component={Recovery} />
         <Stack.Screen name="AdminDrawer" component={AdminDrawer} />
+        <Stack.Screen name="UsuarioDrawer" component={UsuarioDrawer} />
     </Stack.Navigator>
 )
