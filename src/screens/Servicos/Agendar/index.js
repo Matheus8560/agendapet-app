@@ -139,8 +139,9 @@ export default ({route, navigation}) => {
                         vagas.map((item, k)=>(
                             <View key={k} style={styles.cardContainer}>
                                 <Text style={styles.data}>
-                                    { moment(item.dia).utcOffset("-03:00").format("DD/MM/YYYY") }</Text>
+                                    { moment(item.dia).utcOffset("-03:00").format("DD/MM/YYYY") }
                                     { moment(item.dia).format(" - dddd") }
+                                </Text>
                                 <View style={styles.servicoInfo}>    
                                     <View>
                                         <Text>{titulo}</Text>
