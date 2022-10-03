@@ -143,9 +143,11 @@ export default ({route, navigation}) => {
                                     { moment(item.dia).format(" - dddd") }
                                 </Text>
                                 <View style={styles.servicoInfo}>    
-                                    <View>
+                                    <View style={{height:65, width:"65%"}}>
                                         <Text>{titulo}</Text>
-                                        <Text>{descricao}</Text>
+                                        <Text>
+                                            { descricao.length > 35 ? descricao.substr(0, 35)+"..."  : descricao }
+                                        </Text>
                                     </View>
                                     <View>
                                         <Text>Valor: R$ {formatarMoeda(valor/100)}</Text>
